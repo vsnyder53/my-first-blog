@@ -17,6 +17,13 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+    
+    def get_average_rating(self):
+        all_ratings = self.ratings.all()
+        if not all_ratings:
+            return "No ratings yet"
+        total_score = sum(rating.score for rating in all_ratings)
+        return round(total_score / len(all_ratings), 1)
 
 class Comment(models.Model):
     post = models.ForeignKey('blog.Post', on_delete=models.CASCADE, related_name='comments')
@@ -31,3 +38,11 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text
+
+class Rating(models.Model):
+    post = models.ForeignKey('blog.Post', on_delete=models.CASCADE, related_name='ratings')
+    score = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)]) # Limits choices to 1-5
+    created_date = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.score} Stars for {self.post.title}"
